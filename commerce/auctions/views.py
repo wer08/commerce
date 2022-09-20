@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.forms import ModelForm
-from .models import User, AuctionListing
+from .models import User, AuctionListing, Watchlist, Comment, Bid
 from operator import itemgetter
 
 
@@ -39,14 +39,36 @@ def category_listing(request, category_listing):
         "list": list_of_objects
     })
 def watchlist(request):
-    return render(request, "auctions/watchlist.html")
-    
+    listings = []
+    list = Watchlist.objects.filter(user = request.user.id)
+    for object in list:
+        listings.append(object.listing)
+
+
+
+    return render(request, "auctions/watchlist.html",{
+        "listings": listings
+    })
+
 def listing(request, listing):
-    return render(request, "auctions/listing.html", {
-        "listing": listing
-    }
+    if request.method == "POST":
+        listing_object = AuctionListing.objects.get(id = int(listing))
+        new_object = Watchlist(listing = listing_object, user = request.user)
+        if flag:
+            new_object.delete()
+        else:
+            new_object.save()
+        return redirect("watchlist")
     
-    )
+    listing_object = AuctionListing.objects.get(id = int(listing))
+    if listing_object.exists():
+        flag = True
+    else:
+        flag=False
+    return render(request, "auctions/listing.html", {
+        "flag": flag,
+        "listing": listing_object
+    })
 
 
 def index(request):

@@ -21,10 +21,10 @@ class AuctionListing(models.Model):
     description = models.CharField(max_length=512)
     starting_bid = models.DecimalField(max_digits=10, decimal_places=2)
     current_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    image = models.CharField(max_length=200,default="No image",blank=True,null=True)
+    image = models.CharField(max_length=10240,default="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqEWgS0uxxEYJ0PsOb2OgwyWvC0Gjp8NUdPw&usqp=CAU",blank=True,null=True)
 
     def __str__(self):
-        return f"Title: {self.title}, decription: {self.description}, current price: {self.current_price}"
+        return f"ID: {self.id} Title: {self.title}, decription: {self.description}, current price: {self.current_price}"
     
     def save(self, *args, **kwargs):
         self.current_price = self.starting_bid
@@ -36,11 +36,11 @@ class Bid(models.Model):
     date = models.DateField(auto_now_add=True)
     bidder = models.ForeignKey(User, on_delete=models.CASCADE)
 
-class watchlist(models.Model):
+class Watchlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     listing = models.ForeignKey(AuctionListing, on_delete=models.CASCADE)
 
-class comments(models.Model):
+class Comment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     listing = models.ForeignKey(AuctionListing, on_delete=models.CASCADE)
     comment = models.CharField(max_length=1024)

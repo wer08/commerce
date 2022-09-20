@@ -1,0 +1,31 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>{{listing}}</h2>
+    {% if user.is_authenticated %}
+    <li class="nav-item">
+        <form action="{% url 'listing' listing=listing.id %}" method="POST">
+            {% csrf_token %}
+            <input type="hidden" value={{listing}} name="listing">
+            {% if flag %}
+            <input class="btn btn-primary" type="submit" value="Delete from watchlist">
+            {% else %}
+            <input class="btn btn-primary" type="submit" value="Add to watchlist">
+            {% endif %}
+        </form>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'newListing' %}">Create New Listing</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'watchlist' %}">Watchlist</a>
+    </li>
+{% else %}
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'login' %}">Log In</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'register' %}">Register</a>
+    </li>
+{% endif %}
+{% endblock %}
