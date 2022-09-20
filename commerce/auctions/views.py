@@ -38,7 +38,9 @@ def category_listing(request, category_listing):
         "category_listing": category_listing,
         "list": list_of_objects
     })
-
+def watchlist(request):
+    return render(request, "auctions/watchlist.html")
+    
 def listing(request, listing):
     return render(request, "auctions/listing.html", {
         "listing": listing

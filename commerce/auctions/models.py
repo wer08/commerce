@@ -1,4 +1,3 @@
-from tokenize import Token
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -31,9 +30,23 @@ class AuctionListing(models.Model):
         self.current_price = self.starting_bid
         super().save(*args, **kwargs)
 
-class Bids(models.Model):
+class Bid(models.Model):
     listing_id = models.ForeignKey(AuctionListing, on_delete=models.CASCADE)
     bid = models.IntegerField()
+    date = models.DateField(auto_now_add=True)
+    bidder = models.ForeignKey(User, on_delete=models.CASCADE)
+
+class watchlist(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    listing = models.ForeignKey(AuctionListing, on_delete=models.CASCADE)
+
+class comments(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    listing = models.ForeignKey(AuctionListing, on_delete=models.CASCADE)
+    comment = models.CharField(max_length=1024)
+
+
+
 
     
 
