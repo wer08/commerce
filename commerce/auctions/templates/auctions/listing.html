@@ -15,10 +15,18 @@
         </form>
     </li>
     <li class="nav-item">
-        <a class="nav-link" href="{% url 'newListing' %}">Create New Listing</a>
+        <form method="post" action="{% url 'listing' listing=listing.id %}">
+            {% csrf_token %}
+            {{form}}
+            <input class="btn btn-primary" type="submit" value="Bid">
+        </form>
     </li>
     <li class="nav-item">
-        <a class="nav-link" href="{% url 'watchlist' %}">Watchlist</a>
+        <form method="post" action="{% url 'addComment'%}">
+            {% csrf_token %}
+            {{form2}}
+            <input class="btn btn-primary" type="submit" value="Add Coment">
+        </form>
     </li>
 {% else %}
     <li class="nav-item">

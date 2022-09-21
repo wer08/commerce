@@ -4,7 +4,11 @@
     <h2>{{category_listing}}</h2>
     <ul>
     {% for object in list %}
-        <li>{{object}}</li>
+        <li>
+            <a href="{% url 'listing' listing=object.id%}">
+                {{object}}
+            </a>
+        </li>
     {% endfor %}
     </ul>
 {% endblock %}
