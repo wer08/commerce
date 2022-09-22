@@ -1,6 +1,7 @@
+from re import search
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -10,8 +11,11 @@ from decimal import Decimal
 from .models import User, AuctionListing, Watchlist, Comment, Bid
 from operator import itemgetter
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from .functions import checkWatchlist, getComments, getWinner
+from .functions import checkWatchlist, getComments, getWinner, searchedList
+
+
+class SearchingForm(forms.Form):
+    search = forms.CharField()
 
 class NewListingForm(ModelForm):
     class Meta:
@@ -100,7 +104,6 @@ def listing(request, listing):
     if request.method == "POST":
         
         listing_object = AuctionListing.objects.get(pk = listing)
-        print("I'm in POST bidding")
         form = NewBidForm(request.POST)
         if form.is_valid():
             bid = form.cleaned_data['bid']
@@ -109,9 +112,7 @@ def listing(request, listing):
                 bid_object.save()
                 new_price = bid_object.bid
                 listing_object.current_price = new_price
-                print(listing_object.owner)
                 listing_object.save()
-                print(listing_object.owner)
                 messages.add_message(request, messages.SUCCESS, 'Your bid was succesful')
                 return redirect("index")
             else:
@@ -134,7 +135,17 @@ def listing(request, listing):
 
 
 def index(request):
+    if request.method == "POST":
+        form = SearchingForm(request.POST)
+        if form.is_valid():
+            query = form.cleaned_data["search"]
+        searched = searchedList(query, AuctionListing.objects.all())
+        return render(request, "auctions/index.html", {
+        "form": SearchingForm(),
+        "listings": searched
+        })
     return render(request, "auctions/index.html", {
+        "form": SearchingForm(),
         "listings": AuctionListing.objects.all()
     })
 

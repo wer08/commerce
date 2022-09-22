@@ -18,3 +18,11 @@ def getWinner(listing):
     winning_bid = Bid.objects.filter(listing_id = listing).last()
     winner = winning_bid.bidder
     return winner
+
+def searchedList(query,list):
+    new_list = []
+
+    for element in list:
+        if query.lower() in element.title.lower():
+            new_list.append(element)
+    return new_list

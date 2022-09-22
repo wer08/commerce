@@ -2,6 +2,11 @@
 
 {% block body %}
     <h2>Active Listings</h2>
+    <form action="{% url 'index' %}" method="post">
+        {% csrf_token %}
+        {{form}}
+        <input class="btn btn-primary" type="submit" value="Search">
+    </form>
     <ul>
     {% for listing in listings %}
         <li>
