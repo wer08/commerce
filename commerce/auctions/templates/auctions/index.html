@@ -6,7 +6,7 @@
     {% for listing in listings %}
         <li>
             <img src="{{listing.image}}">
-            <a href = "{% url 'listing' listing=listing.id %}">{{listing}}</a>
+            <a href = "{% url 'listing' listing=listing.pk %}">{{listing}}</a>
         </li>
     {% endfor %}
     </ul>

@@ -11,6 +11,7 @@ from .models import User, AuctionListing, Watchlist, Comment, Bid
 from operator import itemgetter
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from .functions import checkWatchlist, getComments, getWinner
 
 class NewListingForm(ModelForm):
     class Meta:
@@ -22,18 +23,6 @@ class NewBidForm(forms.Form):
 
 class NewCommentForm(forms.Form):
     comment = forms.CharField(widget=forms.Textarea, label="")
-
-def checkWatchlist(request,listing):
-    if request.user.is_authenticated:
-        if Watchlist.objects.filter(listing = listing, user = request.user).exists():
-            flag = True
-        else:
-            flag=False
-    else:
-        flag=False
-    return flag
-    
-    
 
 
 def newListing(request):
@@ -68,59 +57,79 @@ def watchlist(request):
         "listings": listings
     })
 
+def addWatchlist(request,listing):
+    listing_object = AuctionListing.objects.get(pk = listing)
+    if checkWatchlist(request,listing_object):
+        new_object = Watchlist.objects.get(listing = listing_object, user = request.user)
+        new_object.delete()
+        return redirect("index")
+    else:
+        new_object = Watchlist(listing = listing_object, user = request.user)
+        new_object.save()
+        return redirect("listing",listing)
+
+
 def addComment(request):
     if request.method == "POST":
         form2 = NewCommentForm(request.POST)
+        listing = request.POST["listing"]
+        listing_object = AuctionListing.objects.get(id = int(listing))
         if form2.is_valid():
             print("I'm here")
             comment = form2.cleaned_data["comment"]
             comment_object = Comment(comment = comment, listing = listing_object, user = request.user)
             comment_object.save()
-    return render(request, "auctions/listing.html", {
-    "flag": flag,
-    "listing": listing_object,
-    "form": NewBidForm(initial={"bid": listing_object.current_price + round(Decimal(0.10),2)})
-    })
+    return redirect("listing",listing)
 
+def closeAuction(request,listing):
+    listing_object = AuctionListing.objects.get(pk = listing)
+    if request.method == "POST":
+        if request.user == listing_object.owner:
+            listing_object.active = False
+            listing_object.save()
+            winner = getWinner(listing_object)
+            messages.add_message(request, messages.SUCCESS, f'You succesfully closed the auction, winner is {winner}')
+            return redirect("listing",listing)
+            
 
 def listing(request, listing):
-    listing_object = AuctionListing.objects.get(id = int(listing))
+
+    listing_object = AuctionListing.objects.get(pk = listing)
+    comments = getComments(listing_object)
     
     if request.method == "POST":
-        listing_object = AuctionListing.objects.get(id = int(listing))
-        if flag:
-            new_object = Watchlist.objects.get(listing = listing_object, user = request.user)
-            new_object.delete()
-            return redirect("index")
-        else:
-            new_object = Watchlist(listing = listing_object, user = request.user)
-            new_object.save()
-            flag = True
-
+        
+        listing_object = AuctionListing.objects.get(pk = listing)
+        print("I'm in POST bidding")
         form = NewBidForm(request.POST)
         if form.is_valid():
             bid = form.cleaned_data['bid']
             if bid > listing_object.current_price:
                 bid_object = Bid(bid = bid, listing_id = listing_object)
                 bid_object.save()
-                listing_object.current_price = bid_object.bid
+                new_price = bid_object.bid
+                listing_object.current_price = new_price
+                print(listing_object.owner)
                 listing_object.save()
+                print(listing_object.owner)
                 messages.add_message(request, messages.SUCCESS, 'Your bid was succesful')
                 return redirect("index")
             else:
                 messages.add_message(request, messages.WARNING, 'Bid must be higher than current price')
                 return render(request, "auctions/listing.html", {
-                    "flag": flag,
+                    "flag": checkWatchlist(request,listing_object),
                     "listing": listing_object,
-                    "form": NewBidForm(initial={"bid": listing_object.current_price + round(Decimal(0.10),2)})
+                    "form": NewBidForm(initial={"bid": listing_object.current_price + round(Decimal(0.10),2)}),
+                    "form2": NewCommentForm(),
+                    "comments": comments,
                 })
-        
-        
 
     return render(request, "auctions/listing.html", {
-        "flag": flag,
+        "flag": checkWatchlist(request,listing_object),
         "listing": listing_object,
-        "form": NewBidForm(initial={"bid": listing_object.current_price + round(Decimal(0.10),2)})
+        "form": NewBidForm(initial={"bid": listing_object.current_price + round(Decimal(0.10),2)}),
+        "form2": NewCommentForm(),
+        "comments": comments,
     })
 
 
