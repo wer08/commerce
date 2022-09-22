@@ -7,12 +7,17 @@
         {{form}}
         <input class="btn btn-primary" type="submit" value="Search">
     </form>
-    <ul>
     {% for listing in listings %}
-        <li>
-            <img src="{{listing.image}}">
-            <a href = "{% url 'listing' listing=listing.pk %}">{{listing}}</a>
-        </li>
+        <a href = "{% url 'listing' listing=listing.pk %}">
+            <div class="row" >
+                <div class="col-3"><img src="{{listing.image}}"></div>
+                <div class="col-9">
+                    <div>{{listing.title}}</div>
+                    <div>{{listing.description}}</div>
+                    <div>{{listing.current_price}}</div>
+                </div>
+            </li>
+            </div>
+        </a>
     {% endfor %}
-    </ul>
 {% endblock %}
