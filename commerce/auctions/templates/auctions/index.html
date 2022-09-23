@@ -9,12 +9,17 @@
     </form>
     {% for listing in listings %}
         <a href = "{% url 'listing' listing=listing.pk %}">
-            <div class="row" >
+            <div class="row list-group-item-light border mt-1" >
                 <div class="col-3"><img src="{{listing.image}}"></div>
                 <div class="col-9">
-                    <div>{{listing.title}}</div>
-                    <div>{{listing.description}}</div>
-                    <div>{{listing.current_price}}</div>
+                    <h3>{{listing.title}}</h3>
+                    <div class="text-muted">{{listing.description}}</div>
+                    <div><strong>Price: $</strong>{{listing.current_price}}</div>
+                    {% if user == listing.owner %}
+                    <form action="{% url 'edit' listing=listing.pk %}">
+                        <input class="btn btn-primary" type="submit" value="Edit">
+                    </form>
+                    {% endif %}
                 </div>
             </li>
             </div>

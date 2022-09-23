@@ -22,11 +22,37 @@ class NewListingForm(ModelForm):
         model = AuctionListing
         fields = ["title", "category", "description", "starting_bid", "image"]
 
+class EditingForm(ModelForm):
+    class Meta:
+        model = AuctionListing
+        fields = ["title", "category", "description", "image"]
+
 class NewBidForm(forms.Form):
     bid = forms.DecimalField() 
 
 class NewCommentForm(forms.Form):
     comment = forms.CharField(widget=forms.Textarea, label="")
+
+
+def edit(request,listing):
+    if request.method == "POST":
+        to_edit_object = AuctionListing.objects.get(pk = listing)
+        form = EditingForm(request.POST)
+        if request.user == to_edit_object.owner:
+            if form.is_valid():
+                to_edit_object.title = form.cleaned_data["title"]
+                to_edit_object.category = form.cleaned_data["category"]
+                to_edit_object.description = form.cleaned_data["description"]
+                to_edit_object.image = form.cleaned_data["image"]
+                to_edit_object.save()
+        
+        messages.add_message(request, messages.SUCCESS, f'You succesfully edited an entry')
+        return redirect("index")
+    to_edit_object = AuctionListing.objects.get(pk = listing)
+    return render(request, "auctions/edit.html",{
+        "listing": to_edit_object,
+        "form": EditingForm(initial={"title": to_edit_object.title, "category":to_edit_object.category, "description":to_edit_object.description, "image":to_edit_object.image})
+    })
 
 
 def newListing(request):
