@@ -15,6 +15,8 @@ def getComments(listing):
     return comments
 
 def getWinner(listing):
+    if not Bid.objects.filter(listing_id = listing):
+        return None
     winning_bid = Bid.objects.filter(listing_id = listing).last()
     winner = winning_bid.bidder
     return winner

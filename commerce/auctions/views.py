@@ -15,7 +15,7 @@ from .functions import checkWatchlist, getComments, getWinner, searchedList
 
 
 class SearchingForm(forms.Form):
-    search = forms.CharField()
+    search = forms.CharField(required=False)
 
 class NewListingForm(ModelForm):
     class Meta:
@@ -31,8 +31,26 @@ class NewBidForm(forms.Form):
     bid = forms.DecimalField() 
 
 class NewCommentForm(forms.Form):
-    comment = forms.CharField(widget=forms.Textarea, label="")
+    comment = forms.CharField(label="")
 
+def won(request):
+    listing = AuctionListing.objects.filter(winner = request.user)
+    return render(request, "auctions/won.html",{
+        "listings": listing
+    })
+
+def search(request):
+    if request.method == "POST":
+        form = SearchingForm(request.POST)
+        if form.is_valid():
+            query = form.cleaned_data["search"]
+        if query == "":
+            searched = AuctionListing.objects.all()
+        searched = searchedList(query, AuctionListing.objects.all())
+        return render(request, "auctions/searched.html", {
+        "form": SearchingForm(),
+        "listings": searched
+        })
 
 def edit(request,listing):
     if request.method == "POST":
@@ -79,7 +97,7 @@ def category_listing(request, category_listing):
     })
 def watchlist(request):
     listings = []
-    list = Watchlist.objects.filter(user = request.user.id)
+    list = Watchlist.objects.filter(user = request.user)
     for object in list:
         listings.append(object.listing)
 
@@ -115,9 +133,10 @@ def closeAuction(request,listing):
     listing_object = AuctionListing.objects.get(pk = listing)
     if request.method == "POST":
         if request.user == listing_object.owner:
-            listing_object.active = False
-            listing_object.save()
             winner = getWinner(listing_object)
+            listing_object.active = False
+            listing_object.winner = winner
+            listing_object.save()
             messages.add_message(request, messages.SUCCESS, f'You succesfully closed the auction, winner is {winner}')
             return redirect("listing",listing)
             
@@ -126,6 +145,7 @@ def listing(request, listing):
 
     listing_object = AuctionListing.objects.get(pk = listing)
     comments = getComments(listing_object)
+    highest_bidder = getWinner(listing_object)
     
     if request.method == "POST":
         
@@ -142,8 +162,10 @@ def listing(request, listing):
                 messages.add_message(request, messages.SUCCESS, 'Your bid was succesful')
                 return redirect("index")
             else:
+                highest_bidder = getWinner(listing_object)
                 messages.add_message(request, messages.WARNING, 'Bid must be higher than current price')
                 return render(request, "auctions/listing.html", {
+                    "highest_bidder": highest_bidder,
                     "flag": checkWatchlist(request,listing_object),
                     "listing": listing_object,
                     "form": NewBidForm(initial={"bid": listing_object.current_price + round(Decimal(0.10),2)}),
@@ -152,6 +174,7 @@ def listing(request, listing):
                 })
 
     return render(request, "auctions/listing.html", {
+        "highest_bidder": highest_bidder,
         "flag": checkWatchlist(request,listing_object),
         "listing": listing_object,
         "form": NewBidForm(initial={"bid": listing_object.current_price + round(Decimal(0.10),2)}),
@@ -161,15 +184,6 @@ def listing(request, listing):
 
 
 def index(request):
-    if request.method == "POST":
-        form = SearchingForm(request.POST)
-        if form.is_valid():
-            query = form.cleaned_data["search"]
-        searched = searchedList(query, AuctionListing.objects.all())
-        return render(request, "auctions/index.html", {
-        "form": SearchingForm(),
-        "listings": searched
-        })
     return render(request, "auctions/index.html", {
         "form": SearchingForm(),
         "listings": AuctionListing.objects.all()

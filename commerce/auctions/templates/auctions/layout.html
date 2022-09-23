@@ -28,27 +28,30 @@
             {% endif %}
         </div>
         <ul class="nav d-flex">
-            <li class="nav-item p-4">
+            <li class="nav-item p-5">
                 <a class="nav-link" href="{% url 'index' %}">Active Listings</a>
             </li>
-            <li class="nav-item p-4">
+            <li class="nav-item p-5">
                 <a class="nav-link" href="{% url 'categories' %}">Categories</a>
             </li>
             {% if user.is_authenticated %}
-                <li class="nav-item p-4">
+                <li class="nav-item p-5">
                     <a class="nav-link" href="{% url 'newListing' %}">Create New Listing</a>
                 </li>
-                <li class="nav-item p-4">
+                <li class="nav-item p-5">
                     <a class="nav-link" href="{% url 'watchlist' %}">Watchlist</a>
                 </li>
-                <li class="nav-item ml-auto p-4">
+                <li class="nav-item p-5">
+                    <a class="nav-link" href="{% url 'won' %}">Won Auctions</a>
+                </li>
+                <li class="nav-item ml-auto p-5">
                     <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
                 </li>
             {% else %}
-                <li class="nav-item ml-auto p-4">
+                <li class="nav-item ml-auto p-5">
                     <a class="nav-link" href="{% url 'login' %}">Log In</a>
                 </li>
-                <li class="nav-item ml-auto p-4">
+                <li class="nav-item ml-auto p-5">
                     <a class="nav-link" href="{% url 'register' %}">Register</a>
                 </li>
             {% endif %}

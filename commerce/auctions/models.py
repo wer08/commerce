@@ -25,8 +25,9 @@ class AuctionListing(models.Model):
     description = models.CharField(max_length=512)
     starting_bid = models.DecimalField(max_digits=10, decimal_places=2)
     current_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="owner")
     active = models.BooleanField(default=True)
+    winner = models.ForeignKey(User, blank=True, null=True, on_delete=models.SET_NULL, related_name="winner")
     image = models.CharField(max_length=10240,default="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqEWgS0uxxEYJ0PsOb2OgwyWvC0Gjp8NUdPw&usqp=CAU",blank=True,null=True)
 
     def __str__(self):

@@ -1,30 +1,21 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h2>Active Listings</h2>
-    <form action="{% url 'search' %}" method="post">
-        {% csrf_token %}
-        {{form}}
-        <input class="btn btn-primary" type="submit" value="Search">
-    </form>
+    <h2>Won auctions</h2>
     {% for listing in listings %}
-        {% if listing.active %}
         <a href = "{% url 'listing' listing=listing.pk %}">
             <div class="row list-group-item-light border mt-1" >
                 <div class="col-3"><img src="{{listing.image}}"></div>
                 <div class="col-9">
                     <h3>{{listing.title}}</h3>
+                    {% if not listing.active %}
+                    <h3 class="text-muted">Listing no longer active</h3>
+                    {% endif %}
                     <div class="text-muted">{{listing.description}}</div>
                     <div><strong>Price: $</strong>{{listing.current_price}}</div>
-                    {% if user == listing.owner %}
-                    <form action="{% url 'edit' listing=listing.pk %}">
-                        <input class="btn btn-primary" type="submit" value="Edit">
-                    </form>
-                    {% endif %}
                 </div>
             </li>
             </div>
         </a>
-        {%endif%}
     {% endfor %}
 {% endblock %}
